@@ -1,0 +1,10 @@
+Install node via install pkg found on website for MacOS.
+
+Frontend created via
+
+npx create-react-app frontend
+
+also do:
+
+npm install styled-components
+npm install react-router-dom

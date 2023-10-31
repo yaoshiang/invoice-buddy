@@ -1,0 +1,13 @@
+environment is contained locally in gitroot/backend/env but not source controlled. It was created with 
+
+conda create --prefix ./env python=3.12.
+
+
+Populate the conda env with 
+
+pip install -r requirments.txt
+
+
+Activate the conda env with
+
+conda activate ./env
