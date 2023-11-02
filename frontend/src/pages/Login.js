@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 
+import SubmitButton from '../components/SubmitButton';
+
+
 const LoginPage = styled.div`
   display: flex;
   flex-direction: column;
@@ -33,7 +36,7 @@ export default function Login({ onLogin }) {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +72,7 @@ export default function Login({ onLogin }) {
           onChange={(e) => setUsernameInput(e.target.value)}  // Update state on input change
         />
         <Input type="password" placeholder="Password" onChange={(e) => setPasswordInput(e.target.value)} />
-        <Button type="button" onClick={handleLogin}>Login</Button>
+        <SubmitButton type="button" onClick={handleLogin}>Login</SubmitButton>
       </LoginForm>
       <div>
         <Button>OAuth Option 1</Button>

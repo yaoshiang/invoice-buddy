@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom'
-
 const HeaderBar = styled.header`
-  background-color: #333;
+  background: linear-gradient(90deg, #505080, #401010);  
   color: white;
   padding: 10px 20px;
   display: flex;
@@ -28,7 +27,7 @@ const DropdownMenu = styled.div`
   top: 100%;
   right: 0;
   background-color: #555;
-  border: 1px solid #ddd;
+  border: 0px solid #ddd;
   width: 150px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
@@ -50,7 +49,7 @@ export default function Header({ onLogout }) {
   const history = useHistory(); // Instantiate the hook
 
   const handleLogout = async () => {
-    const response = await fetch('/logout', {
+    const response = await fetch('/api/logout', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -90,7 +89,7 @@ export default function Header({ onLogout }) {
 
   return (
     <HeaderBar>
-      <h1>Invoice Copilot</h1>
+      <h1>Product Manager CoPilot</h1>
       <AccountContainer ref={dropdownRef}>
         <AccountButton onClick={() => setDropdownVisible(!dropdownVisible)}>Account</AccountButton>
         {dropdownVisible && (

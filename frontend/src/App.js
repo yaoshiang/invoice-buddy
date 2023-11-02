@@ -7,10 +7,16 @@ import Sidebar from './components/Sidebar';
 import Login from './pages/Login';
 import Preferences from './pages/Preferences';
 import Billing from './pages/Billing';
+import Form from './pages/Form';
+import DebugHeader from './components/DebugHeader';
 
 const MainContent = styled.main`
   display: flex;
-  height: 100vh;
+  height: 100vh;  
+`;
+
+const Spacer = styled.div`
+  width: 100px;
 `;
 
 function App() {
@@ -29,7 +35,7 @@ function App() {
   const checkAuthStatus = async () => {
     console.log('checking auth status...')
     try {
-      const response = await fetch('/status');
+      const response = await fetch('/api/status');
       const data = await response.json();
       console.log(data)
       if (data.is_authenticated) {
@@ -48,20 +54,30 @@ function App() {
 
   return (
     <Router>
-      <Header onLogout={handleUserLogout} />
       <Switch>
         {/* Route for Login */}
         <Route path="/login">
-          {isAuthenticated ? (<Redirect to='/' />) : (<Login onLogin={handleUserLogin} />)}
+          {isAuthenticated ? (<Redirect to='/' />) : (
+            <div>
+              <DebugHeader>Use any username/password, authentication is a placeholder for now.</DebugHeader>
+              <Header onLogout={handleUserLogout} />
+              <Login onLogin={handleUserLogin} />
+            </div>)
+          }
         </Route>
 
         {/* Main App Route */}
         <Route path="/" exact>
           {isAuthenticated ? (
-            <MainContent>
-              <Sidebar />
-              <div>Welcome, {user}!</div>
-            </MainContent>
+            <div>
+              <DebugHeader>This is a live call to open ai servers, with the response tokens streamed back for a ChatGPT-style UX. </DebugHeader>
+              <Header onLogout={handleUserLogout} />
+              <MainContent>
+                <Sidebar />
+                <Form />
+                <Spacer />
+              </MainContent>
+            </div>
           ) : (
             <Redirect to="/login" />
           )}
