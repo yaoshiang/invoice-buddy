@@ -1,13 +1,25 @@
-environment is contained locally in gitroot/backend/env but not source controlled. It was created with 
+# conda environment is contained locally in gitroot/backend/env but not source controlled. It was created with 
+conda create --prefix ./env python=3.10.
 
-conda create --prefix ./env python=3.12.
+# Populate the conda env with 
+pip install -r requirements.txt
 
-
-Populate the conda env with 
-
-pip install -r requirments.txt
-
-
-Activate the conda env with
-
+# Activate the conda env with
 conda activate ./env
+
+# Deploy it with AWS Elastic Beanstalk:
+# https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create-deploy-python-flask.html
+
+# Initialize the .elasticbeanstalk directory
+eb init -p python-3.9 pmp --region us-east-1
+# Setup SSH.
+eb init
+# Deploy
+eb create pmcp
+# Modify location of application.py
+eb config 
+# Update
+eb deploy
+# Teardown
+eb terminate pmcp
+
