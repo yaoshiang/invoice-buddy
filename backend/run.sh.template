@@ -1,8 +1,12 @@
 # Copy this to run.sh and fill out the keys. 
 
 
-export FLASK_APP=...
+export FLASK_APP=app/application.py
+
+# Generate a random number for this value.
 export APP_SECRET_KEY=...
+
+# Pull these from openai.com
 export OPENAI_KEY=...
 export OPENAI_ORG=...
 

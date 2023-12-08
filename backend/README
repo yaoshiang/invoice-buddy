@@ -1,25 +1,37 @@
 # conda environment is contained locally in gitroot/backend/env but not source controlled. It was created with 
 conda create --prefix ./env python=3.10.
 
+# Activate the conda env with
+conda activate ./env
+
 # Populate the conda env with 
 pip install -r requirements.txt
 
-# Activate the conda env with
-conda activate ./env
+# Run the flask server with
+./run.sh 
 
 # Deploy it with AWS Elastic Beanstalk:
 # https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create-deploy-python-flask.html
 
-# Initialize the .elasticbeanstalk directory
+# Login
+aws sso login
+
+# Initialize the .elasticbeanstalk directory and config.yml.
 eb init -p python-3.9 pmp --region us-east-1
-# Setup SSH.
-eb init
-# Deploy
-eb create pmcp
-# Modify location of application.py
-eb config 
-# Update
+
+# Manually edit config.yml to update the app names. 
+
+# Deploy to AWS
+eb create lexintel
+
+# Figure out a URL to the EB service. 
+eb open
+
+# Modify location of application.py by editing ./ebextensions per https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/ebextensions.html
+
+# Update AWS when you make local changes you want to push. 
 eb deploy
-# Teardown
+
+# Teardown if you want to start over - this will destroy everything on AWS. 
 eb terminate pmcp
 

@@ -1,1 +1,1 @@
-STATIC_FOLDER = 'build'
+STATIC_FOLDER = 'dist'

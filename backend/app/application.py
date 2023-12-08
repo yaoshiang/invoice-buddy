@@ -266,14 +266,16 @@ def form():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
+  REACT_DIR = "dist"
+
   app.logger.info('serve(): path: ' + str(path))
   try:
-    if path != "" and os.path.exists(os.path.join(BASE_DIR, "build", path)):
-      result = send_from_directory(os.path.join(BASE_DIR, "build"), path)
+    if path != "" and os.path.exists(os.path.join(BASE_DIR, REACT_DIR, path)):
+      result = send_from_directory(os.path.join(BASE_DIR, REACT_DIR), path)
       app.logger.info('result: ' + str(result))
       return result
     else:
-      result = send_from_directory(os.path.join(BASE_DIR, "build"), "index.html")
+      result = send_from_directory(os.path.join(BASE_DIR, REACT_DIR), "index.html")
       app.logger.info('result: ' + str(result))
       return result
   except Exception as e:
