@@ -1,62 +1,4 @@
-import traceback, os, time
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-
-import openai
-openai.api_key = os.getenv('OPENAI_KEY')
-openai.organization = os.getenv('OPENAI_ORG')
-
-from flask import Flask, jsonify, request, session, Response, send_from_directory, send_file
-from flask_cors import CORS
-
-application = app = Flask(__name__, static_folder=None)
-app.config.from_object('app.config')
-app.secret_key = os.getenv('APP_SECRET_KEY')
-app.logger.setLevel(logging.DEBUG)
-CORS(app)
-
-app.logger.debug('Logging DEBUG messages')
-app.logger.info('Logging INFO messages')
-
-  
-@app.route('/api/login', methods=['POST'])
-def login():
-  app.logger.info('login()' + str(request.json))
-  try:
-    username = request.json.get('username')
-    password = request.json.get('password')
-    if username:  # Assume any non-empty username is valid for now.
-      session['user'] = username
-      return jsonify(success=True, message="Logged in successfully"), 200
-    return jsonify(success=False, message="Invalid username"), 400
-  except Exception as e:
-    app.logger.error(traceback.format_exc())
-    return jsonify(success=False, message="Internal error"), 500
-
-@app.route('/api/log', methods=['POST'])
-def log():
-  app.logger.info('log()' + str(request.json))
-  return jsonify(success=True, message="OK 200"), 200
-
-@app.route('/api/logout', methods=['GET'])
-def logout():
-  session['user'] = None
-  return jsonify(success=True, message="Logged out successfully"), 200
-
-
-
-@app.route('/api/status', methods=['GET'])
-def status():
-  user = session.get('user')
-  if user:
-    return jsonify(is_authenticated=True, user=user), 200
-  return jsonify(is_authenticated=False), 401
-
-
-system_prompt = (
+system_prompt= (
     "Your job is to help a product manager write a mock press release. "
     "The Amazon Mock Press Release format is part of the Amazon approach to product development."
     "It starts with a strong emphasis on the user, and how a product will be received by the user."
@@ -130,153 +72,70 @@ user_prompt = (
     "[Quote by a customer of the product/service]"
     "[To learn more, go to [URL].")
 
+import re
+# as per recommendation from @freylis, compile once only
+CLEANR = re.compile('<.*?>') 
 
-@app.route('/api/form', methods=['POST'])
-def form():
-  # user = session.get('user')
-  # if not user:
-  #   return jsonify(is_authenticated=False), 401
+def cleanhtml(raw_html):
+  cleantext = re.sub(CLEANR, '', raw_html)
+  return cleantext
 
-  result = ""
-  data = request.json  # List of dicts, each dict has keys 'label' and 'value'.
+print(cleanhtml(system_prompt))
+print(cleanhtml(user_prompt)      )
 
-  # TODO: Update the messages to be more chatty, and use the third entity (assistant?).
-  messages = [{
-      'role': 'system',
-      'content': system_prompt
-  }, {
-      'role': 'user',
-      'content': user_prompt + f'{str(data)}'
-  }]
+Who is your ideal customer? Be very specific. What annoys them? What keeps them up at night? What will get them promoted?
 
-  # app.logger.debug("Calling OpenAI API with messages: %s", str(messages)[:100])
+The ideal customer is a boutique law firm focused on litigation. They compete for clients by promising a more cost effective 
+approach to litigation than the big firms. one of the ways they do this is by using technology throughout their business.
 
-  TESTING = False
+What is their challenge or pain or frustration? What time of day does it happen? What language does the user say when this happens?
 
-  if TESTING:
-    chunks =  [
-      '<h', '1',
-      '>',
-      'RO',
-      'BOT',
-      'IC',
-      ' DO',
-      'GW',
-      'ALK',
-      'ER',
-      ' APP',
-      ' T',
-      'AK',
-      'ES',
-      ' AW',
-      'AY',
-      ' THE',
-      ' D',
-      'AILY',
-      ' GR',
-      'IND',
-      ' OF',
-      ' W',
-      'ALK',
-      'ING',
-      ' YOUR',
-      ' DO',
-      'G',
-      '</',
-      'h',
-      '1',
-      '>\n',
-      '<h',
-      '2',
-      '>S',
-      'ay',
-      ' goodbye',
-      ' to',
-      ' early',
-      ' morning',
-      ' walks',
-      ' in',
-      ' the',
-      ' cold',
-      '.',
-      ' Let',
-      ' the',
-      ' Rob',
-      'otic',
-      ' Dog',
-      'walker',
-      ' take',
-      ' care',
-      ' of',
-      ' your',
-      ' furry',
-      ' friend',
-      '.</',
-      'h',
-      '2',
-      '>',
-      'SE',
-      'ATTLE',
-      '–',
-      '[',
-      'Int',
-      'ended',
-      ' Launch',
-      ' Date',
-      ']',
-      '<p',
-      '>']
-    
-    def generate():
-      for chunk in chunks:
+The challenge is that they have to manually review documents during discovery to build a chronological timeline of events. This
+could take hours of an associates times, requiring thousands in billable fees, not to mention mind-numbing work for associates
+that leads to burnout. 
 
-        app.logger.debug('chunk_message: ' + chunk)  
-        chunk = chunk.replace('\n', '');
-        yield f"data: {chunk}\n\n"
+How would you describe to Oprah Winfrey what your product is and the single most important benefit for this customer? How would they describe a magical experience with your product?
 
-    return Response(generate(), content_type='text/event-stream')
+Lex Intel automatically scans hundreds of thousands of documents and builds a chronological timeline of events in minutes. This
+is a magical experience for laywers because it saves them hours of time and thousands of dollars in billable fees to get the
+first draft of a timeline down. Every sentence created by the Lex Intel LLMs has references to the original documents, so
+a human lawyer in the loop can review and ensure accuracy.
 
-  response = openai.ChatCompletion.create(model="gpt-3.5-turbo",
-                                          messages=messages,
-                                          stream=True)
+How will your user experience your product? Is it an app, website, or physical product?
 
-  # Can not use this line if stream=True in the call above.
-  # result = response['choices'][0]['message']['content']
+Lexintel is available as an add-in to Microsoft Word, and integrates with all the major document management systems used
+by law firms including iManage and NetDocuments.
 
-  # collected_chunks = []
-  collected_message = ''
+If the product were perfect, what should the user do right now to get access to your product?
 
-  def generate():
-    nonlocal collected_message
-    for chunk in response:
-      # collected_chunks.append(chunk)  # save the event response
-      chunk_message = chunk['choices'][0]['delta'].get('content', '')
-      chunk_message = chunk_message.replace('\n', '');
-      app.logger.debug('chunk_message: ' + chunk_message)
-      collected_message += chunk_message  # save the message
-      yield f"data: {chunk_message}\n\n"
-
-  return Response(generate(), content_type='text/event-stream')
-  # jsonify(is_authenticated=True, user=user,
-  #                result=collected_messages), 200
+Visit lexintel.ai or call 1-800-LEX-INTEL to talk to a solution architect today.
 
 
 
 
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-def serve(path):
-  app.logger.info('serve(): path: ' + str(path))
-  try:
-    if path != "" and os.path.exists(os.path.join(BASE_DIR, "build", path)):
-      result = send_from_directory(os.path.join(BASE_DIR, "build"), path)
-      app.logger.info('result: ' + str(result))
-      return result
-    else:
-      result = send_from_directory(os.path.join(BASE_DIR, "build"), "index.html")
-      app.logger.info('result: ' + str(result))
-      return result
-  except Exception as e:
-    app.logger.error(BASE_DIR)
-    app.logger.error(traceback.format_exc())
 
+Who is your ideal customer? Be very specific. What annoys them? What keeps them up at night? What will get them promoted?
+
+The ideal customer is a boutique law firm focused on litigation. They compete for clients by promising a more cost effective 
+approach to litigation than the big firms. one of the ways they do this is by using technology throughout their business.
+
+What is their challenge or pain or frustration? What time of day does it happen? What language does the user say when this happens?
+
+The challenge is that they have to manually review recent dockets involving their judge to understand the personality, psychology,
+and tendencies of that specific judge to tailor their filings to the judge. This could take hours of an associates times, requiring
+thousands in billable fees. 
+
+How would you describe to Oprah Winfrey what your product is and the single most important benefit for this customer? How would they describe a magical experience with your product?
+
+Lex Intel automatically scans all the dockets for a judge to build a profile of the judge's personality, psychology, and tendencies, then
+it uses that profile to critique draft filings and suggest edits to tailor the filing to the judge. 
+
+
+How will your user experience your product? Is it an app, website, or physical product?
+
+Lexintel is available as an add-in to Microsoft Word, and integrates with all the major court case data providers including
+WestLaw and LexisNexis.
+
+If the product were perfect, what should the user do right now to get access to your product?
+
+Visit lexintel.ai or call 1-800-LEX-INTEL to talk to a solution architect today.
